@@ -30,6 +30,7 @@ const EscapeButton: React.FC = () => {
   const [isScreenFlash, setIsScreenFlash] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const [soundVolume, setSoundVolume] = useState(0.3);
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 800,
     height: typeof window !== 'undefined' ? window.innerHeight : 600
@@ -68,7 +69,7 @@ const EscapeButton: React.FC = () => {
       const selectedSound = cheerSounds[Math.floor(Math.random() * cheerSounds.length)];
 
       const audio = new Audio(selectedSound);
-      audio.volume = 0.8; // 音量を80%に設定
+      audio.volume = soundVolume; // 設定された音量を使用
       audio.currentTime = 0; // 最初から再生
 
       // 音声を再生
@@ -79,7 +80,7 @@ const EscapeButton: React.FC = () => {
     } catch (error) {
       console.log('Audio playback not supported or failed:', error);
     }
-  }, []);
+  }, [soundVolume]);
 
   // 物理エンジンでボタンを超大袈裟に弾き飛ばす
   const applyPhysicsEscape = useCallback(() => {
@@ -590,12 +591,31 @@ const EscapeButton: React.FC = () => {
                 </div>
               </button>
             </div>
+
+            {/* 音量調整スライダー */}
+            {isSoundEnabled && (
+              <div className="mt-3">
+                <div className="text-white text-xs opacity-75 mb-2">音量: {Math.round(soundVolume * 100)}%</div>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  value={soundVolume}
+                  onChange={(e) => setSoundVolume(parseFloat(e.target.value))}
+                  className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                  style={{
+                    background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${soundVolume * 100}%, rgba(255,255,255,0.2) ${soundVolume * 100}%, rgba(255,255,255,0.2) 100%)`
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div className="mt-3 pt-3 border-t border-white/20">
             <div className="text-white/60 text-xs space-y-1">
               <div>難易度: <span className="text-white font-semibold">{currentSettings.label}</span></div>
-              <div>効果音: <span className={`font-semibold ${isSoundEnabled ? 'text-green-300' : 'text-red-300'}`}>{isSoundEnabled ? 'ON' : 'OFF'}</span></div>
+              <div>効果音: <span className={`font-semibold ${isSoundEnabled ? 'text-green-300' : 'text-red-300'}`}>{isSoundEnabled ? `ON (${Math.round(soundVolume * 100)}%)` : 'OFF'}</span></div>
             </div>
           </div>
         </div>
